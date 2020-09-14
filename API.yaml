@@ -1,0 +1,1080 @@
+swagger: "2.0"
+info:
+  description: This is a simple API
+  version: 1.0.0
+  title: LiDi API Collections
+  # put the contact info for your development or API team
+  contact:
+    email: you@your-company.com
+
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+# tags are used for organizing operations
+tags:
+  - name: admin
+    description: Quản trị viên hệ thống, người nắm quyền cao nhất
+  - name: smod
+    description: Quản trị viên hệ thống, giám sát mod
+  - name: mod
+    description: Quản trị viên hệ thống, giám sát user
+  - name: user
+    description: Khách, học viên, giảng viên truy cập website chính
+
+paths:
+  /common/api/auth/signin:
+    post:
+      tags:
+      - user
+      - admin
+      - smod
+      - mod
+      description: signin
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: loginItem
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties: 
+              email:
+                type: string
+              password:
+                type: string
+            example: {
+                        "email": "vinhtt95@gmailcom",
+                        "password": "123456"
+                      }
+              
+      responses:
+        200:
+          description: authen successful
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+                properties:
+                  jwtToken:
+                    type: string
+                  username: 
+                    type: string
+                  role: 
+                    type: array
+                    items: 
+                      $ref: '#/definitions/Role'
+            example: {
+                        "code": 200,
+                        "message": "Successful",
+                        "data": {
+                            "jwtToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ2aW5odHQ5NUBnbWFpbC5jb20iLCJpYXQiOjE2MDAwNjI4ODAsImV4cCI6MTYwMDE0OTI4MH0.s6eA5ydKGCQorkZE3zH6Itb_JSyGrJgk39ubyEFpXNttL1J63I0RKgh0TZ4XEefq_Q4BHsDh20xbwezUY2QCWQ",
+                            "email": "vinhtt95@gmail.com",
+                            "roles": [
+                                "ROLE_STUDENT"
+                            ]
+                        }
+                    } 
+        401: 
+          $ref: '#/definitions/Response/401'
+        405:
+          $ref: '#/definitions/Response/405'
+        406:
+          $ref: '#/definitions/Response/406'              
+  /common/api/auth/signup:
+    post:
+      tags:
+      - user
+      description: signup
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: signupItem
+          description: Thông tin đăng ký tài khoản
+          schema:
+            type: object
+            required:
+              - email
+              - password
+              - dob
+              - fullName
+              - phoneNumber
+              - gender
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+              dob:
+                type: string
+                format: dd/MM/yyyy
+              fullName:
+                type: string
+              phoneNumber:
+                type: string
+                format: (0)+([0-9]{9})
+              gender:
+                type: string
+                format: male|female|other
+            example: {
+                        "email": "sontung199x@gmail.com",
+                        "password": "123456",
+                        "dob": "03/02/1998",
+                        "fullName": "Lê Sơn Tùng",
+                        "phoneNumber": "0342529988",
+                        "gender": "male",
+                        "roles": [
+                          "ROLE_STUDENT","ROLE_TEACHER"
+                        ]                               
+                    }
+      responses:
+        200:
+          description: signup successful
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+                properties:
+                  jwtToken:
+                    type: string
+                  username: 
+                    type: string
+                  role: 
+                    type: array
+                    items: 
+                      $ref: '#/definitions/Role'
+            example: {
+                        "code": 200,
+                        "message": "Successful",
+                        "data": {
+                            "jwtToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0dW5nbHNzZTA1NzAzQGZwdC5lZHUudm4iLCJpYXQiOjE2MDAwNjQ5NjEsImV4cCI6MTYwMDE1MTM2MX0.6dgmQ61I6IbAdKmaKCnr3UdRNfgvyKpXzYHJhDP8IcSdrZePX7fp8u2DjqJq8GpQZEnya1IM6Hszs6vRFHhV_w",
+                            "email": "sontung199x@gmail.com",
+                            "roles": [
+                                "ROLE_STUDENT","ROLE_TEACHER"
+                            ]
+                        }
+                    } 
+        405: empty parameter
+          $ref: '#/definitions/Response/405'
+        406: undefined exception
+          $ref: '#/definitions/Response/406'
+        407:
+          $ref: '#/definiions/Response/407' 
+        408:
+          $ref: '#/definitions/Response/408'          
+  /common/api/auth/change-password:
+    post:
+      tags:
+      - user
+      description: Thay đổi mật khẩu mới
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: inventoryItem
+        schema:
+          type: object
+          required:
+          - email
+          - oldPassword
+          - newPassword
+          properties:
+            email:
+              type: string
+            oldPassword:
+              type: string
+            newPassword:
+              type: string
+          example: {
+                      "email": "vinhtt95@gmail.com",
+                      "oldPassword": "123445",
+                      "newPassword": "123@123a"
+                  }
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+                properties:
+                  jwtToken:
+                    type: string
+                  username: 
+                    type: string
+                  role: 
+                    type: array
+                    items: 
+                      $ref: '#/definitions/Role'
+            example: {
+                        "code": 200,
+                        "message": "Update password successful!",
+                        "data": {
+                            "jwtToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0dW5nbHNzZTA1NzAzQGZwdC5lZHUudm4iLCJpYXQiOjE2MDAwNjQ5NjEsImV4cCI6MTYwMDE1MTM2MX0.6dgmQ61I6IbAdKmaKCnr3UdRNfgvyKpXzYHJhDP8IcSdrZePX7fp8u2DjqJq8GpQZEnya1IM6Hszs6vRFHhV_w",
+                            "email": "vinhtt95@gmail.com",
+                            "roles": [
+                                "ROLE_STUDENT"
+                            ]
+                        }
+                    } 
+        400:
+          description: Authentiaction failed
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+            example:  {
+                          "code": 401,
+                          "message": "Change password failed!",
+                          "data": null
+                      }
+        400:
+          description: Parameter invalid, empty, null
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+            example:  {
+                          "code": 405,
+                          "message": "Parameter invalid!",
+                          "data": null
+                      }
+        400:
+          description: Old password is incorrect
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+            example:  {
+                          "code": 405,
+                          "message": "Old password is incorrect!",
+                          "data": null
+                      }
+  /common/api/auth/get-verify-code:
+    get:
+      tags:
+      - user
+      description: Lấy code để đặt mật khẩu mới
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+        name: email
+        type: string
+        example: vinhtt@gmail.com
+      responses:
+        200:
+          description: email sent
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+            example:  {
+                        "code": 200,
+                        "message": "Email sent!",
+                        "data": null
+                    }
+        400:
+          description: Send code failed!
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+            example:  {
+                          "code": 401,
+                          "message": "Send code failed!",
+                          "data": null
+                      }
+  /common/api/auth/verify-code:
+    post:
+      tags:
+      - user
+      description: verify code để reset password
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: inventoryItem
+        schema:
+          type: object
+          required:
+          - email
+          - verifyCode
+          properties:
+            email:
+              type: string
+            verifyCode:
+              type: string
+      responses:
+        200:
+          description: Verify successful
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+                properties:
+                  resetCode:
+                    type: string
+            example:  {
+                      "code": 200,
+                      "message": "Verify successful!",
+                      "data": {
+                          "resetCode": "$2a$10$V406uU5yjfi6Comjqfi9AeLcAzqwY7eeoYWZ8cSZYqDHl0mZmPd.O"
+                      }
+                  }
+        400:
+          description: Send code failed!
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+            example:  {
+                          "code": 401,
+                          "message": "Send code failed!",
+                          "data": null
+                      }
+        400:
+          description: Parameter invalid, empty, null
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+            example:  {
+                          "code": 405,
+                          "message": "Parameter invalid!",
+                          "data": null
+                      }
+        400:
+          description: wrong verify code
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+            example:  {
+                          "code": 405,
+                          "message": "Verified code is invalid!",
+                          "data": null
+                      }              
+        400:
+          description: verify code is expired
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+            example:  {
+                          "code": 405,
+                          "message": "Verified code is expired!",
+                          "data": null
+                      }
+  /common/api/auth/reset-password:
+    post:
+      tags:
+      - user
+      description: Đổi mật khẩu mới từ link gửi trong mail
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: inventoryItem
+        schema:
+          type: object
+          required:
+          - email
+          - newPassword
+          - resetCode
+          properties:
+            email:
+              type: string
+            newPassword:
+              type: string
+            resetCode:
+              type: string
+          example: {
+                      "email": "sontung199x@gmail.com",
+                      "resetCode": "$2a$10$GnlAFNgwt8BDSb8tE.Ih1..9z4yMy5ARnsULan9mskFzvPp9NXWcO",
+                      "newPassword": "123456"
+                  }      
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+                properties:
+                  jwtToken:
+                    type: string
+                  username: 
+                    type: string
+                  role: 
+                    type: array
+                    items: 
+                      $ref: '#/definitions/Role'
+            example: {
+                      "code": 200,
+                      "message": "Reset password successfull!",
+                      "data": {
+                          "jwtToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzb250dW5nMTk5eEBnbWFpbC5jb20iLCJpYXQiOjE2MDAwNzAwMTMsImV4cCI6MTYwMDE1NjQxM30.3-sSZIfkbaBQdc50CGJGCZ09cAjHTulKnkkzYcCNifSJ2nDgSoezp6yYTJ0wqdLlgmoYjuRM-loYRWUpL0WeSg",
+                          "email": "sontung199x@gmail.com",
+                          "roles": [
+                              "ROLE_STUDENT"
+                          ]
+                      }
+                  }
+        400:
+          description: Reset password failed
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+            example:  {
+                          "code": 401,
+                          "message": "Reset password failed!",
+                          "data": null
+                      }
+        400:
+          description: Parameter invalid, empty, null
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+            example:  {
+                          "code": 405,
+                          "message": "Parameter invalid!",
+                          "data": null
+                      }
+        400:
+          description: invalid reset code
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+              data:
+                type: object
+            example:  {
+                          "code": 405,
+                          "message": "Reset code is invalid!",
+                          "data": null
+                      }
+  /products:
+    get:
+      tags:
+      - user
+      - mod
+      - smod
+      - admin
+      summary: Danh sách các khoá học
+      operationId: listProducts
+      description: Liệt kê các khoá học
+      produces:
+      - applications/json
+      parameters:
+      - in: query
+        name: searchString
+        description: pass an optional search string for looking up inventory
+        required: false
+        type: string
+      - in: query
+        name: skip
+        description: number of records to skip for pagination
+        type: integer
+        format: int32
+        minimum: 0
+      - in: query
+        name: limit
+        description: maximum number of records to return
+        type: integer
+        format: int32
+        minimum: 0
+        maximum: 50
+      responses:
+        200:
+          description: search results matching criteria
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductsItem'
+        400:
+          description: bad input parameter
+    post:
+      tags:
+      - admin
+      summary: adds an inventory item
+      operationId: addInventory
+      description: Adds an item to the system
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: inventoryItem
+        description: Inventory item to add
+        schema:
+          $ref: '#/definitions/ProductsItem'
+      responses:
+        201:
+          description: item created
+        400:
+          description: invalid input, object invalid
+        409:
+          description: an existing item already exists
+  /users:
+    get:
+      tags:
+      - user
+      - mod
+      - smod
+      - admin
+      summary: Danh sách các thành viên
+      operationId: members
+      description: |
+        Liệt kê tất cả các tài khoản
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: id
+        description: lấy thông tin của một tài khoản cụ thể theo ID
+        type: integer
+        format: int32
+        minimum: 0
+      - in: query
+        name: skip
+        description: number of records to skip for pagination
+        type: integer
+        format: int32
+        minimum: 0
+      - in: query
+        name: limit
+        description: maximum number of records to return
+        type: integer
+        format: int32
+        minimum: 0
+        maximum: 50
+      responses:
+        200:
+          description: search results matching criteria
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Users'
+        400:
+          description: bad input parameter
+    put:
+      tags:
+      - user
+      - mod
+      - smod
+      - admin
+      summary: Chỉnh sửa thông tin tài khoản
+      operationId: updateUser
+      description: Chỉnh sửa thông tin tài khoản
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: inventoryItem
+        description: Đưa toàn bộ thông tin của 1 tài khoản
+        schema:
+          $ref: '#/definitions/Users'
+      responses:
+        201:
+          description: update done
+        400:
+          description: invalid input, object invalid
+        409:
+          description: an existing item already exists
+  /cart:
+    get:
+      tags:
+      - user
+      summary: danh sach cac san pham trong gio hang
+      operationId: listCart
+      description: |
+        Liệt kê tất cả các sản phẩm trong giỏ hàng của user
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: skip
+        description: number of records to skip for pagination
+        type: integer
+        format: int32
+        minimum: 0
+      - in: query
+        name: limit
+        description: maximum number of records to return
+        type: integer
+        format: int32
+        minimum: 0
+        maximum: 50
+      responses:
+        200:
+          description: search results matching criteria
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductsItem'
+        400:
+          description: bad input parameter
+    put:
+      tags:
+      - user
+      summary: Thêm sản phầm vào giỏ hàng người dùng
+      operationId: addCart
+      description: thêm sản phẩm vào giỏ hàng
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: inventoryItem
+        schema:
+          $ref: '#/definitions/ProductsItem'
+      responses:
+        200:
+          description: update done
+        400:
+          description: invalid input, object invalid
+        405:
+          description: an existing item already exists
+    delete:
+      tags:
+      - user
+      summary: Xóa khóa học khỏi giỏ hàng của người dùng 
+      operationId: deleteCart
+      description: Xóa khóa học trong giỏ hàng người dùng
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: id
+        description: Xóa bỏ sản phẩm theo id sản phẩm
+        type: integer
+        format: int32
+        minimum: 0
+      responses:
+        200:
+          description: OK
+  /transaction:
+    get:
+      tags:
+      - user
+      - admin
+      summary: Danh sách toàn bộ giao dịch của một người dùng
+      operationId: getTransaction
+      description: Danh sách toàn bộ giao dịch của một người dùng
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: skip
+        description: number of records to skip for pagination
+        type: integer
+        format: int32
+        minimum: 0
+      - in: query
+        name: limit
+        description: maximum number of records to return
+        type: integer
+        format: int32
+        minimum: 0
+        maximum: 50
+      responses:
+        200:
+          description: OK 
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Transaction'
+  /notifications:
+    get:
+      tags:
+      - user
+      summary: Danh sách toàn bộ giao dịch của một người dùng
+      operationId: getNotifications
+      description: Danh sách toàn bộ giao dịch của một người dùng
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: skip
+        description: number of records to skip for pagination
+        type: integer
+        format: int32
+        minimum: 0
+      - in: query
+        name: limit
+        description: maximum number of records to return
+        type: integer
+        format: int32
+        minimum: 0
+        maximum: 50
+      responses:
+        200:
+          description: OK 
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Notification'
+definitions:
+  Users:
+    type: object
+    required:
+    - id
+    - urlImage
+    - fullname
+    - phoneNumber
+    - gender
+    - dob
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+      urlImage:
+        type: string
+        example: http://vinhtt.com/image/avata/04341234.jpg
+      email:
+        type: string
+        example: vinhtt95@gmail.com
+      dob:
+        type: string
+        example: '2016-08-29T09:12:33.001Z'
+      fullname:
+        type: string
+        example: Trương Thế Vinh
+      phoneNumber:
+        type: string
+        example: 0832682626
+      gender:
+        type: string
+        example: Nam 
+  ProductsItem:
+    type: object
+    required:
+    - id
+    - title
+    - priceOld
+    - priveSale
+    - author
+    - rateNumber
+    - rating
+    - isFavorite
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+      title:
+        type: string
+        example: Widget Adapter
+      priceOld:
+        type: number
+        example: 290000
+      priveSale:
+        type: number
+        example: 300000
+      author:
+        type: string
+        example: Jackie
+      rateNumber:
+        type: number
+        example: 4.5
+      rating:
+        type: number
+        example: 200
+      isFavorite:
+        type: boolean
+        example: 1
+  Transaction:
+    type: object
+    required:
+    - id
+    - code
+    - userName
+    - change
+    - transactionType
+    - cash
+    - time
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+      code:
+        type: string
+        example: Lidi456789538476
+      userName:
+        type: string
+        example: Nguyen Hai Nam
+      change:
+        type: number
+        example: -200000
+      transactionType:
+        type: string
+        example: mua khoa hoc
+      cash:
+        type: number
+        example: 2300000
+      time:
+        type: string
+        format: date
+        example: '2018-03-20T09:12:28Z'
+  Notification:
+    type: object
+    required:
+    - id
+    - from
+    - to
+    - shortDes
+    - fullDes
+    - time
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+      from:
+        type: string
+        example: admin
+      to:
+        type: string
+        example: Nguyen Hai Nam
+      shortDes:
+        type: number
+        example: thư mời trải nghiệm tính năng
+      fullDes:
+        type: string
+        example: thư mời trải nghiệm tính năng mới của hệ thống với vô số lợi ích
+      time:
+        type: string
+        format: date
+        example: '2018-03-20T09:12:28Z'
+  Response:
+    408:
+      description: existed value
+      schema:
+        type: object
+        properties:
+          code:
+            type: integer
+          message:
+            type: string
+          data:
+            type: object
+        example:  {
+                      "code": 408,
+                      "message": "Existed value",
+                      "data": null
+                  }
+    407:
+      description: Parameter format invalid
+      schema:
+        type: object
+        properties:
+          code:
+            type: integer
+          message:
+            type: string
+          data:
+            type: object
+        example:  {
+                      "code": 407,
+                      "message": "Parameter format invalid",
+                      "data": null
+                  }              
+    406:
+      description: undefined error
+      schema:
+        type: object
+        properties:
+          code:
+            type: integer
+          message:
+            type: string
+          data:
+            type: object
+        example:  {
+                      "code": 406,
+                      "message": "Undefined error",
+                      "data": null
+                  }
+    405:
+      description: Parameter empty
+      schema:
+        type: object
+        properties:
+          code:
+            type: integer
+          message:
+            type: string
+          data:
+            type: object
+        example:  {
+                      "code": 405,
+                      "message": "Parameter value empty",
+                      "data": null
+                  }
+    403:
+      description: Parameter time expired
+      schema:
+        type: object
+        properties:
+          code:
+            type: integer
+          message:
+            type: string
+          data:
+            type: object
+        example:  {
+                      "code": 403,
+                      "message": "Parameter time expired",
+                      "data": null
+                  }  
+    402:
+      description: Parameter value invalid
+      schema:
+        type: object
+        properties:
+          code:
+            type: integer
+          message:
+            type: string
+          data:
+            type: object
+        example:  {
+                      "code": 402,
+                      "message": "Parameter value invalid",
+                      "data": null
+                  }  
+    401:
+      description: Authorization exception
+      schema:
+        type: object
+        properties:
+          code:
+            type: integer
+          message:
+            type: string
+          data:
+            type: object
+        example:  {
+                      "code": 401,
+                      "message": "Authorization exception",
+                      "data": null
+                  }          
+
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /lidiedu/LidiEdu/1.0.0
+schemes:
+  - https
